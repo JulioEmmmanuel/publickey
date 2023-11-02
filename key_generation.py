@@ -1,4 +1,6 @@
 #importación de librerías
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
@@ -36,3 +38,36 @@ private_key_file.close()
 public_key_file = open("example-rsa.pub", "w")
 public_key_file.write(pem_public_key.decode())
 public_key_file.close()
+
+
+#Probar el funcionamiento de las llaves
+
+# Crear un mensaje para cifrar
+message = b"Este es un mensaje de prueba."
+
+# Cifrar el mensaje con la clave pública
+public_key = private_key.public_key()
+ciphertext = public_key.encrypt(
+    message,
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
+)
+
+# Descifrar el mensaje con la clave privada
+plaintext = private_key.decrypt(
+    ciphertext,
+    padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None
+    )
+)
+
+# Verificar si el mensaje original y el mensaje descifrado son iguales
+if plaintext == message:
+    print("Las claves RSA son correctas.")
+else:
+    print("Error: Las claves RSA no son correctas.")
